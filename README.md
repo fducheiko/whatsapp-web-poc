@@ -20,10 +20,11 @@ Depois acesse http://localhost:8080.
 A conversa **Banco** é fixa: fica no topo da lista e não some ao gerar novas conversas.
 
 1. Digite **Olá**: o Banco responde com a mensagem de boas-vindas e um botão **Opções**.
-2. Clique em **Opções**: abre a lista de seleção com **Saldo**, **Extrato** e **Boletos**.
+2. Clique em **Opções**: abre a lista de seleção com **Saldo**, **Extrato**, **Boletos** e **Falar com meu gerente**.
 3. Escolha uma opção: a escolha aparece citando a mensagem anterior, e o Banco responde com a informação e oferece o menu de novo.
+4. Em **Falar com meu gerente**, o Banco oferece o botão **Conversar com Flavio Gerente**, que abre a conversa com o gerente. Ela já traz uma mensagem dele e fica sempre na lista.
 
-Também é possível digitar livremente: "saldo", "extrato" e "boletos" levam à resposta correspondente, "opções" mostra o menu, e qualquer outro texto recebe uma orientação para usar o menu. Os valores e datas são simulados.
+Também é possível digitar livremente: "saldo", "extrato", "boletos" e "gerente" levam à resposta correspondente, "opções" mostra o menu, e qualquer outro texto recebe uma orientação para usar o menu. Os valores e datas são simulados.
 
 O roteiro fica em [journey.js](whatsapp-web-poc/journey.js): textos, opções e respostas.
 

@@ -30,6 +30,7 @@
   const state = {
     chats: [],
     bank: null,
+    manager: null,
     activeId: null,
     query: '',
     filter: 'all',
@@ -58,6 +59,8 @@
   const ICON_GROUP =
     '<circle cx="9" cy="8" r="3.2"/><path d="M3.2 19.5c.5-3.3 2.9-5.2 5.8-5.2s5.3 1.9 5.8 5.2z"/>' +
     '<circle cx="16.5" cy="9" r="2.6"/><path d="M16.2 14.4c2.4.2 4.3 1.9 4.8 5.1h-4.1z"/>';
+  const ICON_CHAT = '<path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12z"/>';
+  const CTA_ICONS = { options: ICON_LIST, manager: ICON_CHAT };
 
   // Formatação do WhatsApp: *negrito*, _itálico_ e ~tachado~ (só quando colados a palavras)
   const FORMAT_PATTERN = /(?<!\w)\*([^*\n]+)\*(?!\w)|(?<!\w)_([^_\n]+)_(?!\w)|(?<!\w)~([^~\n]+)~(?!\w)/g;
@@ -161,16 +164,16 @@
     return ticks;
   }
 
-  // Botão dentro da mensagem: abre as opções (quando tem ação) ou só informa (ex.: "ir para o site")
+  // Botão dentro da mensagem: executa uma ação (abrir opções, ir para o gerente) ou só informa (ex.: "ir para o site")
   function createCta(message, chat) {
     const { cta } = message;
     const isAction = Boolean(cta.action);
     const node = el(isAction ? 'button' : 'div', 'bubble__cta');
     if (isAction) {
       node.type = 'button';
-      node.addEventListener('click', () => openOptions(chat.id, message.id));
+      node.addEventListener('click', () => runAction(cta.action, chat, message));
     }
-    node.append(svgIcon(cta.action === 'options' ? ICON_LIST : ICON_LINK), el('span', '', cta.label));
+    node.append(svgIcon(CTA_ICONS[cta.action] ?? ICON_LINK), el('span', '', cta.label));
     return node;
   }
 
@@ -434,7 +437,7 @@
     clearTimers();
     closeOptions();
     resetFlow(state.bank);
-    state.chats = [state.bank, ...WAData.generateChats()];
+    state.chats = [state.bank, state.manager, ...WAData.generateChats()];
     closeChat();
   }
 
@@ -497,6 +500,12 @@
       refresh();
       later(() => pumpFlow(chat), 300);
     }, step.delay);
+  }
+
+  // Ação de um botão da mensagem
+  function runAction(action, chat, message) {
+    if (action === 'options') openOptions(chat.id, message.id);
+    if (action === 'manager') openChat(state.manager.id);
   }
 
   function openOptions(chatId, messageId) {
@@ -653,6 +662,7 @@
   /* ---------- Início ---------- */
 
   state.bank = WAJourney.createChat();
+  state.manager = WAJourney.createManagerChat();
   regenerate();
   updateComposer();
 })();

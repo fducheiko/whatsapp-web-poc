@@ -1,5 +1,5 @@
 /* Jornada roteirizada da conversa "Banco".
- * Define a conversa fixa, o menu de opções e as respostas automáticas.
+ * Define a conversa fixa, o menu de opções, a conversa com o gerente e as respostas automáticas.
  * Expõe `window.WAJourney`. */
 (function (global) {
   'use strict';
@@ -14,11 +14,16 @@
   // Botão que abre a lista de opções
   const OPTIONS_CTA = { label: 'Opções', action: 'options' };
 
+  // Gerente de relacionamento: o botão leva à conversa com ele (criada em createManagerChat)
+  const MANAGER_NAME = 'Flavio Gerente';
+  const MANAGER_CTA = { label: `Conversar com ${MANAGER_NAME}`, action: 'manager' };
+
   // Opções do menu, na ordem em que aparecem. `keywords` reconhece o que for digitado livremente.
   const OPTIONS = [
     { id: 'saldo', title: 'Saldo', description: 'Consulte o saldo disponível na sua conta', keywords: /saldo/ },
     { id: 'extrato', title: 'Extrato', description: 'Veja suas últimas movimentações', keywords: /extrato|movimentac/ },
     { id: 'boletos', title: 'Boletos', description: 'Consulte os boletos em aberto', keywords: /boleto/ },
+    { id: 'gerente', title: 'Falar com meu gerente', description: 'Converse com o seu gerente de relacionamento', keywords: /gerente|atendente|humano/ },
   ];
 
   const BRL = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' });
@@ -67,9 +72,16 @@
       },
       FOLLOW_UP,
     ],
+    gerente: () => [
+      {
+        text: `Claro! Seu gerente de relacionamento é o ${MANAGER_NAME}. Clique no botão abaixo para continuar a conversa com ele.`,
+        cta: MANAGER_CTA,
+        delay: 1000,
+      },
+    ],
   };
 
-  const GREETING = /^(oi|ola|bom dia|boa tarde|boa noite|e ai)\b/;
+  const GREETING =/^(oi|ola|bom dia|boa tarde|boa noite|e ai)\b/;
   const MENU = /opc|menu|ajuda/;
 
   function answerOption(id) {
@@ -93,7 +105,7 @@
 
     return [
       {
-        text: 'Desculpe, não entendi. Você pode clicar em "Opções" ou escrever *saldo*, *extrato* ou *boletos*.',
+        text: 'Desculpe, não entendi. Você pode clicar em "Opções" ou escrever *saldo*, *extrato*, *boletos* ou *gerente*.',
         cta: OPTIONS_CTA,
         delay: 1000,
       },
@@ -122,5 +134,32 @@
     };
   }
 
-  global.WAJourney = { createChat, respond, answerOption, options: OPTIONS };
+  // Conversa com o gerente: já começa com uma mensagem dele e fica sempre na lista
+  function createManagerChat() {
+    const createdAt = Date.now();
+    return {
+      id: WAData.uid('chat'),
+      type: 'contact',
+      name: MANAGER_NAME,
+      color: '#0f766e',
+      online: true,
+      lastSeen: createdAt,
+      favorite: true,
+      muted: false,
+      unread: 1,
+      typing: false,
+      replyPending: false,
+      createdAt,
+      messages: [
+        {
+          id: WAData.uid('m'),
+          from: 'them',
+          text: 'Oi! Aqui é o Flavio, seu gerente de relacionamento. Pode me chamar por aqui sempre que precisar.',
+          time: createdAt - 60000,
+        },
+      ],
+    };
+  }
+
+  global.WAJourney = { createChat, createManagerChat, respond, answerOption, options: OPTIONS };
 })(window);
